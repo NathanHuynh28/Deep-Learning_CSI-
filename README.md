@@ -2,7 +2,7 @@
 
 Dự án nghiên cứu sử dụng Deep Learning để phân loại tư thế người (pose estimation) từ dữ liệu CSI (Channel State Information) - thông tin trạng thái kênh Wi-Fi.
 
-## 📋 Tổng Quan Project
+##  Tổng Quan Project
 
 Project này chia thành **4 phần chính**:
 
@@ -80,7 +80,7 @@ Deep-Learning_CSI-/
 │
 ├── Phần 2 mô hình/                    # PHẦN 2: Modeling & Training
 │   ├── README.md                      # Hướng dẫn chi tiết phần 2
-│   ├── workflow_all.ipynb             # ⭐ Notebook chính: chạy 35 training runs
+│   ├── workflow_all.ipynb             #  Notebook chính: chạy 35 training runs
 │   ├── workflow.ipynb                 # Reference GRU cơ bản
 │   ├── workflow_attention_gru.ipynb   # Reference Attention-GRU
 │   ├── workflow_multi_output_best_model.ipynb  # Reference Multi-output
@@ -108,7 +108,7 @@ Deep-Learning_CSI-/
 │
 ├── Phần 3 đánh giá/                   # PHẦN 3: Evaluation & Reporting
 │   ├── README.md                      # Hướng dẫn chi tiết phần 3
-│   ├── evaluation_dashboard.ipynb     # ⭐ Dashboard đánh giá kết quả từ Phần 2
+│   ├── evaluation_dashboard.ipynb     #  Dashboard đánh giá kết quả từ Phần 2
 │   ├── stage_comparison.ipynb         # So sánh các stage (1/2/3/4)
 │   ├── ablation_analysis.ipynb        # Phân tích ablation từ Stage 4
 │   ├── test_metrics_report.ipynb      # Báo cáo test metrics chi tiết
@@ -134,7 +134,7 @@ Deep-Learning_CSI-/
 
 ---
 
-## 🔄 Luồng Dữ Liệu Tổng Thể
+##  Luồng Dữ Liệu Tổng Thể
 
 ```
 PHẦN 0: Thu Thập Dữ Liệu
@@ -218,7 +218,7 @@ PHẦN 3: Evaluation & Reporting
 
 ---
 
-## 📊 Định Dạng Dữ Liệu
+##  Định Dạng Dữ Liệu
 
 ### **Input (Phần 0 - Thu Thập)**
 - CSI data từ 3 RX modules
@@ -246,44 +246,44 @@ Sau xử lí trong Dataset:
 
 ---
 
-## 🎯 Mục Tiêu & Các Task
+##  Mục Tiêu & Các Task
 
 ### **Phần 0: Mục Tiêu Thu Thập Dữ Liệu**
-1. ✅ Xây dựng perimeter layout với 4 modules (1 TX + 3 RX)
-2. ✅ Thu thập 1370 samples với các tư thế đa dạng
-3. ✅ Đảm bảo chất lượng CSI (clean frames, valid sequences)
-4. ✅ Tạo calibration metadata cho preprocessing
-5. ✅ QC kiểm tra firmware counters, channel, baudrate
+1.  Xây dựng perimeter layout với 4 modules (1 TX + 3 RX)
+2.  Thu thập 1370 samples với các tư thế đa dạng
+3.  Đảm bảo chất lượng CSI (clean frames, valid sequences)
+4.  Tạo calibration metadata cho preprocessing
+5.  QC kiểm tra firmware counters, channel, baudrate
 
 ### **Phần 1: Mục Tiêu**
-1. ✅ Tách dữ liệu thành train/val/test
-2. ✅ Cắt window 192 frames
-3. ✅ Loại nhiễu (Denoise)
-4. ✅ Augmentation temporal shift
-5. ✅ Fit normalization stats trên train
-6. ✅ Chuẩn bị PyTorch Dataset/DataLoader
-7. ✅ Kiểm tra class imbalance
+1.  Tách dữ liệu thành train/val/test
+2.  Cắt window 192 frames
+3.  Loại nhiễu (Denoise)
+4.  Augmentation temporal shift
+5.  Fit normalization stats trên train
+6.  Chuẩn bị PyTorch Dataset/DataLoader
+7.  Kiểm tra class imbalance
 
 **Lưu ý:** Không huấn luyện model trong Phần 1.
 
 ### **Phần 2: Mục Tiêu**
-1. ✅ Xây dựng GRU baseline cho chuỗi CSI
-2. ✅ Thêm Attention để học temporal attention weights
-3. ✅ Kiểm tra multi-output cho các task: presence, cell, pose, center
-4. ✅ Dùng validation metrics để chọn model tốt nhất
-5. ✅ Chỉ dùng test metrics cho báo cáo cuối, không tune model
+1.  Xây dựng GRU baseline cho chuỗi CSI
+2.  Thêm Attention để học temporal attention weights
+3.  Kiểm tra multi-output cho các task: presence, cell, pose, center
+4.  Dùng validation metrics để chọn model tốt nhất
+5.  Chỉ dùng test metrics cho báo cáo cuối, không tune model
 
 ### **Phần 3: Mục Tiêu Đánh Giá**
-1. ✅ Đọc và phân tích output từ Phần 2 (runs/)
-2. ✅ So sánh hiệu suất các stage (Stage 1, 2, 3, 4)
-3. ✅ Phân tích kết quả ablation từ Stage 4
-4. ✅ Đánh giá test metrics của model được chọn
-5. ✅ Tạo visualizations (confusion matrix, loss curves, comparison charts)
-6. ✅ Viết báo cáo cuối cùng với kết luận
+1.  Đọc và phân tích output từ Phần 2 (runs/)
+2.  So sánh hiệu suất các stage (Stage 1, 2, 3, 4)
+3.  Phân tích kết quả ablation từ Stage 4
+4.  Đánh giá test metrics của model được chọn
+5.  Tạo visualizations (confusion matrix, loss curves, comparison charts)
+6.  Viết báo cáo cuối cùng với kết luận
 
 ---
 
-## 🏗️ Kiến Trúc Model
+##  Kiến Trúc Model
 
 ### **Stage 1: GRU Baseline**
 ```
@@ -360,7 +360,7 @@ Shared Attention-GRU Trunk
 
 ---
 
-## 🎮 Phần 0: Hướng Dẫn Thu Thập Dữ Liệu CSI
+##  Phần 0: Hướng Dẫn Thu Thập Dữ Liệu CSI
 
 ### **1. Active Layout: layout1**
 
@@ -479,7 +479,7 @@ Mỗi file: 438 columns = 27 base + 3 RX × (9 metadata + 128 CSI)
 
 ---
 
-## 📝 Cách Chạy
+##  Cách Chạy
 
 ### **Phần 0: Thu Thập Dữ Liệu**
 ```bash
@@ -548,7 +548,7 @@ Mỗi file: 438 columns = 27 base + 3 RX × (9 metadata + 128 CSI)
 
 ---
 
-## 💾 Output Sau Khi Chạy
+##  Output Sau Khi Chạy
 
 Mỗi training run tạo một thư mục với:
 
@@ -613,7 +613,7 @@ Phần 3 sẽ đọc các file này để tạo báo cáo chi tiết.
 
 ---
 
-## 🚀 Cách Viết Báo Cáo
+##  Cách Viết Báo Cáo
 
 ### **Cấu Trúc Báo Cáo (dùng Phần 3)**
 
@@ -739,7 +739,7 @@ else:
 
 ---
 
-## 📞 Liên Hệ & Support
+##  Liên Hệ & Support
 
 Dự án dùng:
 - **Phần 0:** ESP32-S3, Arduino IDE, Python controller
