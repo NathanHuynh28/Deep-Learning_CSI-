@@ -4,7 +4,7 @@ Dự án nghiên cứu sử dụng Deep Learning để phân loại tư thế ng
 
 ## 📋 Tổng Quan Project
 
-Project này chia thành **3 phần chính**:
+Project này chia thành **4 phần chính**:
 
 ### **Phần 0: Thu Thập Dữ Liệu CSI (Data Collection)**
 - Thu thập dữ liệu CSI từ 4 ESP32-S3 modules (1 TX + 3 RX)
@@ -21,6 +21,12 @@ Project này chia thành **3 phần chính**:
 - Xây dựng các model Deep Learning: GRU, Attention-GRU, Multi-output
 - Thực hiện các thử nghiệm có kiểm soát với 35 training runs
 - Output: model tốt nhất, metrics đánh giá, dự đoán
+
+### **Phần 3: Đánh Giá & Báo Cáo (Evaluation & Reporting)**
+- Phân tích chi tiết kết quả từ các stage training
+- So sánh các model architectures và training techniques
+- Đánh giá performance trên test set
+- Tạo visualizations và báo cáo cuối cùng
 
 ---
 
@@ -99,7 +105,24 @@ Deep-Learning_CSI-/
 │               ├── best_model.pt      # Checkpoint tốt nhất
 │               ├── last_model.pt      # Checkpoint cuối cùng
 │               └── selection.json     # Thông tin selector (multi-output)
-
+│
+├── Phần 3 đánh giá/                   # PHẦN 3: Evaluation & Reporting
+│   ├── README.md                      # Hướng dẫn chi tiết phần 3
+│   ├── evaluation_dashboard.ipynb     # ⭐ Dashboard đánh giá kết quả từ Phần 2
+│   ├── stage_comparison.ipynb         # So sánh các stage (1/2/3/4)
+│   ├── ablation_analysis.ipynb        # Phân tích ablation từ Stage 4
+│   ├── test_metrics_report.ipynb      # Báo cáo test metrics chi tiết
+│   ├── visualizations/
+│   │   ├── confusion_matrix.py        # Vẽ confusion matrix
+│   │   ├── loss_curves.py             # Vẽ learning curves
+│   │   ├── metric_comparison.py       # So sánh metrics qua stage
+│   │   └── cell_localization_map.py   # Heatmap cell localization
+│   └── reports/                       # Output báo cáo
+│       ├── stage_summary.csv
+│       ├── model_ranking.csv
+│       ├── test_results.csv
+│       └── final_report.md
+│
 ├── Dataset_CSI_3D_v2/                 # Dữ liệu gốc (từ Phần 0)
 │   └── session1/
 │       ├── session.md
@@ -181,7 +204,16 @@ PHẦN 2: Training
         Stage 4: Final Confirmation & Ablation (8 runs)
         ├─→ Xác nhận & ablation study
                 ↓
-        Best Model + Metrics cho Report
+        Best Model + Metrics
+                ↓
+PHẦN 3: Evaluation & Reporting
+                ↓
+        evaluation_dashboard.ipynb
+        stage_comparison.ipynb
+        ablation_analysis.ipynb
+        test_metrics_report.ipynb
+                ↓
+        Final Report + Visualizations
 ```
 
 ---
@@ -240,6 +272,14 @@ Sau xử lí trong Dataset:
 3. ✅ Kiểm tra multi-output cho các task: presence, cell, pose, center
 4. ✅ Dùng validation metrics để chọn model tốt nhất
 5. ✅ Chỉ dùng test metrics cho báo cáo cuối, không tune model
+
+### **Phần 3: Mục Tiêu Đánh Giá**
+1. ✅ Đọc và phân tích output từ Phần 2 (runs/)
+2. ✅ So sánh hiệu suất các stage (Stage 1, 2, 3, 4)
+3. ✅ Phân tích kết quả ablation từ Stage 4
+4. ✅ Đánh giá test metrics của model được chọn
+5. ✅ Tạo visualizations (confusion matrix, loss curves, comparison charts)
+6. ✅ Viết báo cáo cuối cùng với kết luận
 
 ---
 
@@ -469,10 +509,30 @@ Mỗi file: 438 columns = 27 base + 3 RX × (9 metadata + 128 CSI)
 5. Output: runs/<model_type>/<experiment>/<files>
 ```
 
+### **Phần 3: Đánh Giá & Báo Cáo**
+```bash
+1. Hoàn tất Phần 2, giữ nguyên: Phần 2 mô hình/runs/
+2. Mở Jupyter Notebook
+3. Chạy: Phần 3 đánh giá/evaluation_dashboard.ipynb
+   - Kiểm tra overview kết quả tất cả 35 runs
+   - Xem top models từ mỗi stage
+4. Chạy: Phần 3 đánh giá/stage_comparison.ipynb
+   - So sánh hiệu suất giữa các stage
+   - Trực quan hóa progression
+5. Chạy: Phần 3 đánh giá/ablation_analysis.ipynb
+   - Phân tích ablation từ Stage 4
+   - Đánh giá impact của từng technique
+6. Chạy: Phần 3 đánh giá/test_metrics_report.ipynb
+   - Tạo báo cáo test metrics chi tiết
+   - Xuất bảng và visualizations
+7. Output: Phần 3 đánh giá/reports/ (CSV, visualizations, markdown report)
+```
+
 **Thời gian ước tính:** 
 - Phần 0 (Thu thập): 8-10 giờ (1370 samples)
 - Phần 1 (Preprocessing): 5-10 phút
 - Phần 2 (Training): 25-46 phút
+- Phần 3 (Evaluation): 10-20 phút
 
 ---
 
@@ -501,6 +561,8 @@ Mỗi training run tạo một thư mục với:
 | `best_model.pt` | Checkpoint tốt nhất (validation) |
 | `last_model.pt` | Checkpoint cuối cùng |
 | `selection.json` | Thông tin selector (multi-output) |
+
+Phần 3 sẽ đọc các file này để tạo báo cáo chi tiết.
 
 ---
 
@@ -534,6 +596,12 @@ Mỗi training run tạo một thư mục với:
 - `learning_rate`: 1e-3, 5e-4
 - `max_epochs`: 80-100
 
+### **Phần 3:**
+- `RUNS_DIR`: Đường dẫn tới `Phần 2 mô hình/runs/`
+- `SELECTED_RUNS`: Danh sách runs để đánh giá (default: tất cả `S1_`, `S2_`, `S3_`, `S4_`)
+- `PLOT_DPI`: 150-300 (độ phân giải plots)
+- `REPORT_FORMAT`: 'markdown' hoặc 'html'
+
 ---
 
 ## 📚 Tài Liệu Chi Tiết
@@ -541,22 +609,74 @@ Mỗi training run tạo một thư mục với:
 - **Phần 0 Chi Tiết:** `code firmware v2/operation_guide.md`
 - **Phần 1 Chi Tiết:** `Phần 1 tiền xử lí/README.md`
 - **Phần 2 Chi Tiết:** `Phần 2 mô hình/README.md`
+- **Phần 3 Chi Tiết:** `Phần 3 đánh giá/README.md`
 
 ---
 
 ## 🚀 Cách Viết Báo Cáo
 
-1. **Phần 0:** Mô tả setup hardware, layout, số samples thu được, QC metrics
-2. **Phần 1:** Mô tả preprocessing steps, data augmentation, normalization
-3. **Stage 1 Ranking:** Tìm GRU backbone ổn định
-4. **Stage 2 Ranking:** Xem Attention có cải thiện không
-5. **Stage 3 Ranking:** Xem Multi-output & bottleneck cell
-6. **Stage 4:** Xác nhận top model & đọc ablation
-7. **Cuối Cùng:** Dùng test metrics của model được chọn
+### **Cấu Trúc Báo Cáo (dùng Phần 3)**
 
-**Quy tắc:** 
-- Validation → chọn model nào
-- Test → model đã chọn đạt kết quả cuối ra sao
+1. **Executive Summary**
+   - Tóm tắt kết quả chính: best model, best metrics
+   - So sánh các approach (GRU vs Attention vs Multi-output)
+
+2. **Phần 0: Data Collection**
+   - Mô tả setup hardware, layout, số samples thu được
+   - QC metrics: clean_frames, missing_seq, tần suất lớp
+
+3. **Phần 1: Preprocessing**
+   - Pipeline steps: split, window, denoise, augment, normalize
+   - Data augmentation strategy & impact
+   - Class imbalance analysis
+
+4. **Phần 2: Model Training**
+   
+   **Stage 1 - GRU Baseline Ranking:**
+   - Bảng so sánh 7 runs (validation metrics)
+   - Top 3 GRU configs được chọn
+   - Nhận xét: hidden_size, layers, batch size effect
+   
+   **Stage 2 - Attention-GRU Narrowing:**
+   - Bảng so sánh 10 runs
+   - Top 4 Attention configs được chọn
+   - Phân tích: Attention dim impact, BiGRU probe result
+   
+   **Stage 3 - Multi-output Cell Bottleneck:**
+   - Bảng so sánh 10 multi-output runs
+   - Focus vào cell classification metrics (`cell_masked_macro_f1`)
+   - Phân tích: MLP head, focal loss, effective-number weighting
+   
+   **Stage 4 - Final Confirmation & Ablation:**
+   - Seed consistency check (S4_F01/03 vs S4_F02/04)
+   - Ablation results: linear vs MLP, CE vs focal, 1-layer vs 2-layer
+   - Top model selection reasoning
+
+5. **Test Results (Model được chọn)**
+   - Test metrics của model validation tốt nhất:
+     - Pose: `test_macro_f1`, `test_accuracy`, confusion matrix
+     - Cell: `test_cell_masked_macro_f1`, relaxed localization metrics
+     - Presence: `test_presence_macro_f1`, `test_presence_accuracy`
+     - Center: `center_mean_error_m`, `center_std_error_m`
+   - Visualizations: confusion matrix, cell heatmap, loss curves
+
+6. **Analysis & Insights**
+   - Bottleneck (cell classification) root cause
+   - Attention mechanism effectiveness
+   - Multi-output shared trunk benefit
+   - Dataset size limitation impact
+   - Recommendations for future improvements
+
+7. **Conclusion**
+   - Kết quả chính đạt được
+   - So sánh với baseline/literature (nếu có)
+   - Giới hạn & hướng phát triển tiếp theo
+
+**Quy tắc Cơ Bản:**
+- Validation → dùng để **chọn model**
+- Test → dùng để **báo cáo kết quả cuối**
+- Không tune model dựa trên test set
+- Nếu `cell_masked_macro_f1` thấp, ghi chú rõ: dataset nhỏ (140 val, 139 test), 25 lớp, low support
 
 ---
 
@@ -600,6 +720,23 @@ print(data['X_train'].shape)  # Should be (652, 3, 64, 192)
 print(data['y_train'].shape)  # Should be (652,)
 ```
 
+### **Dashboard Phần 3 không đọc được runs**
+
+```python
+# Kiểm tra đường dẫn runs
+import os
+runs_dir = "Phần 2 mô hình/runs"
+if os.path.exists(runs_dir):
+    print("✓ Thư mục runs tồn tại")
+    for model_type in os.listdir(runs_dir):
+        model_path = os.path.join(runs_dir, model_type)
+        if os.path.isdir(model_path):
+            runs = [r for r in os.listdir(model_path) if r.startswith(('S1_', 'S2_', 'S3_', 'S4_'))]
+            print(f"  {model_type}: {len(runs)} runs")
+else:
+    print("✗ Thư mục runs không tìm thấy")
+```
+
 ---
 
 ## 📞 Liên Hệ & Support
@@ -607,6 +744,7 @@ print(data['y_train'].shape)  # Should be (652,)
 Dự án dùng:
 - **Phần 0:** ESP32-S3, Arduino IDE, Python controller
 - **Phần 1 & 2:** PyTorch, Jupyter Notebook, NumPy/Pandas
+- **Phần 3:** PyTorch, Matplotlib, Seaborn, Pandas, Scikit-learn
 
 Xem các README trong từng phần để biết chi tiết.
 
