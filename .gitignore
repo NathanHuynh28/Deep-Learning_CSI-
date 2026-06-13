@@ -1,0 +1,18 @@
+﻿__pycache__/
+*.pyc
+
+*.pt
+*.pth
+*.pkl
+*.h5
+*.onnx
+*.npz
+
+Phần 1 tiền xử lí/processed/
+Phần 1 tiền xử lí/reports/denoise/
+Phần 2 mô hình/runs/
+
+.sisyphus/
+.env
+*.key
+*.pem
