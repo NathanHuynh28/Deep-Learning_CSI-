@@ -4,7 +4,13 @@ Dự án nghiên cứu sử dụng Deep Learning để phân loại tư thế ng
 
 ## 📋 Tổng Quan Project
 
-Project này chia thành **2 phần chính**:
+Project này chia thành **3 phần chính**:
+
+### **Phần 0: Thu Thập Dữ Liệu CSI (Data Collection)**
+- Thu thập dữ liệu CSI từ 4 ESP32-S3 modules (1 TX + 3 RX)
+- Xây dựng perimeter layout với 25 zones (5x5 grid)
+- Thu thập 1370 samples với các tư thế: Standing, Sitting, Arms_Out, Lying, Walk_in_place, Transition
+- Output: CSV files chứa CSI metadata và I/Q values
 
 ### **Phần 1: Tiền Xử Lí Dữ Liệu (Preprocessing)**
 - Chuyển dữ liệu Wi-Fi CSI thô thành dữ liệu sẵn sàng cho model
@@ -24,6 +30,15 @@ Project này chia thành **2 phần chính**:
 Deep-Learning_CSI-/
 │
 ├── README.md                          # File này
+│
+├── code firmware v2/                  # PHẦN 0: Thu thập dữ liệu
+│   ├── operation_guide.md             # Hướng dẫn chi tiết thu thập dữ liệu
+│   ├── controller.py                  # Controller chính điều khiển 4 nodes
+│   ├── firmware/                      # Code firmware cho TX/RX
+│   │   ├── tx_firmware.ino
+│   │   └── rx_firmware.ino
+│   └── config/
+│       └── calibration.json           # Calibration cho layout/nodes
 │
 ├── Phần 1 tiền xử lí/                 # PHẦN 1: Preprocessing
 │   ├── README.md                      # Hướng dẫn chi tiết phần 1
@@ -85,16 +100,41 @@ Deep-Learning_CSI-/
 │               ├── last_model.pt      # Checkpoint cuối cùng
 │               └── selection.json     # Thông tin selector (multi-output)
 
+├── Dataset_CSI_3D_v2/                 # Dữ liệu gốc (từ Phần 0)
+│   └── session1/
+│       ├── session.md
+│       ├── calibration.json
+│       ├── manifest.csv
+│       ├── quality.csv
+│       └── data_P*.csv                # Raw CSI data (6 files)
 ```
 
 ---
 
 ## 🔄 Luồng Dữ Liệu Tổng Thể
 
-### **Phần 1: Preprocessing**
-
 ```
-Dataset_CSI_3D_v2/session1/
+PHẦN 0: Thu Thập Dữ Liệu
+│
+├─ 4 ESP32-S3 Modules (1 TX + 3 RX)
+│  ├─ TX: x=-0.50, y=1.50 (West)
+│  ├─ RX1: x=1.50, y=-0.50 (North)
+│  ├─ RX2: x=3.50, y=1.50 (East)
+│  └─ RX3: x=1.50, y=3.50 (South)
+│
+├─ 1370 Samples (25 zones x 5x5 grid)
+│  ├─ 80 Empty (checkpoints)
+│  ├─ 390 Standing
+│  ├─ 310 Sitting
+│  ├─ 150 Arms_Out
+│  ├─ 190 Lying
+│  ├─ 160 Walk_in_place
+│  └─ 90 Transition
+│
+└─ Dataset_CSI_3D_v2/session1/
+   └─ data_P*.csv (438 columns: metadata + 3 RX × (9 metadata + 128 CSI))
+        ↓
+PHẦN 1: Preprocessing
         ↓
 split_and_window.py
         ↓
@@ -120,37 +160,40 @@ split_and_window.py
                           ↓
                     CSI_dataset.py ──→ DataLoader batches
                                        shape: (B, 192, 192)
-```
-
-### **Phần 2: Training**
-
-```
-4 artifacts chính:
-├── raw (652/140/139)
-├── raw_shift (2608/140/139)
-├── phase_hampel (652/140/139)
-└── phase_hampel_shift (2608/140/139)
-
+                          ↓
+PHẦN 2: Training
+                          ↓
+        4 artifacts chính:
+        ├── raw (652/140/139)
+        ├── raw_shift (2608/140/139)
+        ├── phase_hampel (652/140/139)
+        └── phase_hampel_shift (2608/140/139)
                     ↓
-        
-Stage 1: GRU Screening (7 runs)
-├─→ Top 3 chọn lọc
-        ↓
-Stage 2: Attention-GRU Narrowing (10 runs)
-├─→ Top 4 chọn lọc
-        ↓
-Stage 3: Multi-output Cell Bottleneck (10 runs)
-├─→ Top 3 chọn lọc
-        ↓
-Stage 4: Final Confirmation & Ablation (8 runs)
-├─→ Xác nhận & ablation study
-        ↓
-Best Model + Metrics cho Report
+        Stage 1: GRU Screening (7 runs)
+        ├─→ Top 3 chọn lọc
+                ↓
+        Stage 2: Attention-GRU Narrowing (10 runs)
+        ├─→ Top 4 chọn lọc
+                ↓
+        Stage 3: Multi-output Cell Bottleneck (10 runs)
+        ├─→ Top 3 chọn lọc
+                ↓
+        Stage 4: Final Confirmation & Ablation (8 runs)
+        ├─→ Xác nhận & ablation study
+                ↓
+        Best Model + Metrics cho Report
 ```
 
 ---
 
 ## 📊 Định Dạng Dữ Liệu
+
+### **Input (Phần 0 - Thu Thập)**
+- CSI data từ 3 RX modules
+- Mỗi frame: 100 Hz, 128 I/Q values per RX, 13 metadata fields
+- CSV format: 438 columns
+- Tư thế: 7 classes (Standing, Sitting, Arms_Out, Lying, Walk_in_place, Transition, Empty)
+- Vị trí: 25 zones (5x5 grid)
 
 ### **Input (Phần 1)**
 - CSI raw data từ Wi-Fi, shape: `(3, 64, 192)`
@@ -172,6 +215,13 @@ Sau xử lí trong Dataset:
 ---
 
 ## 🎯 Mục Tiêu & Các Task
+
+### **Phần 0: Mục Tiêu Thu Thập Dữ Liệu**
+1. ✅ Xây dựng perimeter layout với 4 modules (1 TX + 3 RX)
+2. ✅ Thu thập 1370 samples với các tư thế đa dạng
+3. ✅ Đảm bảo chất lượng CSI (clean frames, valid sequences)
+4. ✅ Tạo calibration metadata cho preprocessing
+5. ✅ QC kiểm tra firmware counters, channel, baudrate
 
 ### **Phần 1: Mục Tiêu**
 1. ✅ Tách dữ liệu thành train/val/test
@@ -270,7 +320,137 @@ Shared Attention-GRU Trunk
 
 ---
 
+## 🎮 Phần 0: Hướng Dẫn Thu Thập Dữ Liệu CSI
+
+### **1. Active Layout: layout1**
+
+Quy ước tọa độ bắt buộc:
+- Nhìn top-down từ trên xuống
+- Gốc (0,0) là góc trên-trái của lưới 5 cột × 5 hàng
+- `+x` tăng từ west sang east
+- `+y` tăng từ north sang south
+- Kích thước grid: 3.00m × 3.00m, mỗi zone 0.60m × 0.60m
+
+**Node Positions:**
+
+| Node | Side | Tọa Độ | Chiều Cao |
+|---|---|---|---|
+| TX | West | x=-0.50, y=1.50 | h=1.00 |
+| RX1 | North | x=1.50, y=-0.50 | h=1.00 |
+| RX2 | East | x=3.50, y=1.50 | h=1.00 |
+| RX3 | South | x=1.50, y=3.50 | h=1.00 |
+
+```
+                     North / -y
+                     RX1 (1.50, -0.50, h=1.00)
+                           |
+                           v
+    +------+------+------+------+------+   East / +x
+    | C01  | C02  | C03  | C04  | C05  |   RX2 (3.50, 1.50, h=1.00)
+    +------+------+------+------+------+         <---
+West| C06  | C07  | C08  | C09  | C10  |
+TX --->+------+------+------+------+------+   origin top-left of grid
+(-0.50,| C11  | C12  | C13  | C14  | C15  |   +x west->east
+ 1.50) +------+------+------+------+------+   +y north->south
+h=1.00 | C16  | C17  | C18  | C19  | C20  |
+    +------+------+------+------+------+
+    | C21  | C22  | C23  | C24  | C25  |
+    +------+------+------+------+------+
+                           ^
+                           |
+                    RX3 (1.50, 3.50, h=1.00)
+                    South / +y
+```
+
+### **2. Tư Thế (Pose/Orientation)**
+
+| Label | Degree | Ý Nghĩa |
+|---|---:|---|
+| `Empty` | - | Không có người trong vùng thu |
+| `Facing_RX` | 0 | +x, nhìn east về RX2 |
+| `Facing_TX` | 180 | -x, nhìn west về TX |
+| `Facing_Left` | 270 | -y, nhìn north về RX1 |
+| `Facing_Right` | 90 | +y, nhìn south về RX3 |
+| `Diagonal_RX1` | 315 | +x/-y, hướng northeast |
+| `Diagonal_RX3` | 45 | +x/+y, hướng southeast |
+
+### **3. Large Collection Plan: PART1_25ZONE_PERIMETER_V1**
+
+**Tổng 1370 samples:**
+
+| Block | Count | Mục Đích |
+|---|---:|---|
+| Empty checkpoints | 80 | 16 checkpoint × 5 trial |
+| Standing | 390 | 78/person: interior 3×3 × 4 hướng, perimeter, diagonal |
+| Sitting | 310 | 62/person: interior 3×3 × 4 hướng, inward, diagonal |
+| Arms_Out | 150 | 30/person: cross5 × 4 hướng, corner inward |
+| Lying | 190 | 38/person: cross5 × 4 hướng, corner/edge inward |
+| Walk_in_place | 160 | 32/person: cross5 × 4 hướng, corner/edge inward |
+| Transition | 90 | 18/person: cross5 × 2 axis, corner/edge inward |
+
+**Core cross zones:** `C08, C12, C13, C14, C18`
+
+### **4. QC Checklist**
+
+**Trước Thu:**
+- [ ] Dọn phòng, không có người khác đi qua
+- [ ] Dán lưới C01..C25 đúng kích thước 3m × 3m
+- [ ] Đặt TX west, RX1 north, RX2 east, RX3 south đúng tọa độ
+- [ ] Anten cao 1.00m, cùng hướng, không chạm trong session
+- [ ] Chụp ảnh setup phòng và ghi tọa độ nếu khác default
+- [ ] Kiểm tra channel TX/RX/controller đều là 1
+- [ ] Kiểm tra TX Serial Monitor `TX_MAC,...`
+- [ ] Chạy: `python controller.py --plan-only`
+- [ ] Chạy: `python controller.py --preflight-only`
+- [ ] Preflight PASS: `first_word_invalid=0`, `malformed=0`, `no_csi/output_busy` trong ngưỡng
+
+**Trong Thu:**
+- [ ] Actor đứng center/footprint controller yêu cầu
+- [ ] Actor quay đúng orientation theo map
+- [ ] Empty sample `P0/NO_CELL` phải không có người
+- [ ] Transition dùng pattern sit_down_then_stand_up
+- [ ] FAIL thì thử lại sample đó, không skip
+
+**Sau Thu:**
+- [ ] `quality.csv` PASS: `clean_frames=240`
+- [ ] Không có `first_word_invalid_*`
+- [ ] `missing_seq <= 20` cho PASS
+- [ ] Mỗi RX có `RX*_csi_len = 128`
+- [ ] `calibration.json` đầy đủ metadata
+- [ ] Không trộn session khác layout/channel
+
+### **5. File Output (Phần 0)**
+
+```
+Dataset_CSI_3D_v2/session1/
+├── session.md
+├── calibration.json
+├── manifest.csv
+├── quality.csv
+├── data_P0.csv  (Empty samples)
+├── data_P1.csv  (Person 1)
+├── data_P2.csv  (Person 2)
+├── data_P3.csv  (Person 3)
+├── data_P4.csv  (Person 4)
+└── data_P5.csv  (Person 5)
+```
+
+Mỗi file: 438 columns = 27 base + 3 RX × (9 metadata + 128 CSI)
+
+---
+
 ## 📝 Cách Chạy
+
+### **Phần 0: Thu Thập Dữ Liệu**
+```bash
+1. Chuẩn bị 4 ESP32-S3 modules (firmware trong code firmware v2/)
+2. Xây dựng perimeter layout theo layout1 (5x5 grid, 3m x 3m)
+3. Cấp điện, flash firmware cho TX + 3 RX
+4. Chạy: python controller.py --plan-only    # Kiểm tra plan
+5. Chạy: python controller.py --preflight-only  # QC trước
+6. Chạy: python controller.py  # Thu thập 1370 samples
+7. Output: Dataset_CSI_3D_v2/session1/
+```
 
 ### **Phần 1: Preprocessing**
 ```bash
@@ -289,7 +469,10 @@ Shared Attention-GRU Trunk
 5. Output: runs/<model_type>/<experiment>/<files>
 ```
 
-**Thời gian ước tính:** 25-46 phút (tùy early stopping & hardware)
+**Thời gian ước tính:** 
+- Phần 0 (Thu thập): 8-10 giờ (1370 samples)
+- Phần 1 (Preprocessing): 5-10 phút
+- Phần 2 (Training): 25-46 phút
 
 ---
 
@@ -323,6 +506,16 @@ Mỗi training run tạo một thư mục với:
 
 ## ⚙️ Các Config Chính
 
+### **Phần 0 (Controller):**
+- `SESSION_ID`: "session1" (tên session thu thập)
+- `ROOM_NAME`: "room1" (tên phòng)
+- `LAYOUT_ID`: "layout1" (ID layout được dùng)
+- `COLLECTION_PLAN_ID`: "PART1_25ZONE_PERIMETER_V1" (plan 1370 samples)
+- `CALIBRATION_ID`: "calibration1" (ID calibration)
+- `COLLECTION_MODE`: "part1_large" (mode thu chính)
+- `COM_PORTS`: Các cổng COM của TX/RX (điều chỉnh theo máy)
+- `CHANNEL`: 1 (Wi-Fi channel, giữ nguyên)
+
 ### **Phần 1:**
 - `OVERWRITE_DENOISE`: True = rebuild denoise, False = giữ cũ
 - `OVERWRITE_AUGMENT`: True = rebuild augmentation, False = giữ cũ
@@ -345,6 +538,7 @@ Mỗi training run tạo một thư mục với:
 
 ## 📚 Tài Liệu Chi Tiết
 
+- **Phần 0 Chi Tiết:** `code firmware v2/operation_guide.md`
 - **Phần 1 Chi Tiết:** `Phần 1 tiền xử lí/README.md`
 - **Phần 2 Chi Tiết:** `Phần 2 mô hình/README.md`
 
@@ -352,11 +546,13 @@ Mỗi training run tạo một thư mục với:
 
 ## 🚀 Cách Viết Báo Cáo
 
-1. **Stage 1 Ranking:** Tìm GRU backbone ổn định
-2. **Stage 2 Ranking:** Xem Attention có cải thiện không
-3. **Stage 3 Ranking:** Xem Multi-output & bottleneck cell
-4. **Stage 4:** Xác nhận top model & đọc ablation
-5. **Cuối Cùng:** Dùng test metrics của model được chọn
+1. **Phần 0:** Mô tả setup hardware, layout, số samples thu được, QC metrics
+2. **Phần 1:** Mô tả preprocessing steps, data augmentation, normalization
+3. **Stage 1 Ranking:** Tìm GRU backbone ổn định
+4. **Stage 2 Ranking:** Xem Attention có cải thiện không
+5. **Stage 3 Ranking:** Xem Multi-output & bottleneck cell
+6. **Stage 4:** Xác nhận top model & đọc ablation
+7. **Cuối Cùng:** Dùng test metrics của model được chọn
 
 **Quy tắc:** 
 - Validation → chọn model nào
@@ -370,11 +566,48 @@ Mỗi training run tạo một thư mục với:
 - Cell classification là bottleneck (25 classes, support thấp)
 - Kết quả có thể dao động theo seed
 - Không nên tuyên bố model đã "giải quyết" bài toán hoàn toàn
+- CSI là 2.5D occupancy/footprint, không phải true 3D body mesh hay 17 keypoints
+
+---
+
+## 🔧 Debug & Troubleshooting
+
+### **Lỗi 3 RX Drop (Phần 0)**
+
+Nếu 1 RX và 2 RX pass nhưng 3 RX cùng lúc bị drop rate:
+
+```bash
+# Flash lại firmware
+python controller.py --preflight-only
+python controller.py --soak-only --soak-seconds 30
+```
+
+**Kiểm tra firmware stats:**
+- `csi_cb`: Tổng CSI callback firmware nhìn thấy
+- `csi_seen`: CSI callback đã qua length filter
+- `espnow_valid`: ESP-NOW packet đã qua validation
+- `seq_gap`: Nếu tăng → RX đang mất packet trên radio
+- `csi_mac_mismatch`: Kiểm tra TX_MAC_FILTER
+- `output_busy`: Serial output bottleneck
+
+### **Kiểm tra Preprocessing**
+
+```python
+# Check shape sau mỗi bước
+import numpy as np
+data = np.load('processed/windows/raw/data.npz')
+print(data['X_train'].shape)  # Should be (652, 3, 64, 192)
+print(data['y_train'].shape)  # Should be (652,)
+```
 
 ---
 
 ## 📞 Liên Hệ & Support
 
-Dự án dùng PyTorch, Jupyter Notebook. Xem các README trong từng phần để biết chi tiết.
+Dự án dùng:
+- **Phần 0:** ESP32-S3, Arduino IDE, Python controller
+- **Phần 1 & 2:** PyTorch, Jupyter Notebook, NumPy/Pandas
+
+Xem các README trong từng phần để biết chi tiết.
 
 **Last Updated:** June 13, 2026
