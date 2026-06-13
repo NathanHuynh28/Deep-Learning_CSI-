@@ -604,13 +604,15 @@ Phần 3 sẽ đọc các file này để tạo báo cáo chi tiết.
 
 ---
 
-## 📚 Tài Liệu Chi Tiết
+##  Tài Liệu Chi Tiết
 
 - **Phần 0 Chi Tiết:** `code firmware v2/operation_guide.md`
 - **Phần 1 Chi Tiết:** `Phần 1 tiền xử lí/README.md`
 - **Phần 2 Chi Tiết:** `Phần 2 mô hình/README.md`
 - **Phần 3 Chi Tiết:** `Phần 3 đánh giá/README.md`
 
+## Dữ liệu thực tế thu được
+_ ** Drive: https://drive.google.com/drive/folders/1jCZ7GMYpG97Wm9grUGFyqYHF_QiTJDwr?usp=drive_link
 ---
 
 ##  Cách Viết Báo Cáo
@@ -680,7 +682,7 @@ Phần 3 sẽ đọc các file này để tạo báo cáo chi tiết.
 
 ---
 
-## 📝 Ghi Chú Hạn Chế
+## Ghi Chú Hạn Chế
 
 - Dataset nhỏ, val/test chỉ có 140/139 mẫu
 - Cell classification là bottleneck (25 classes, support thấp)
@@ -690,7 +692,7 @@ Phần 3 sẽ đọc các file này để tạo báo cáo chi tiết.
 
 ---
 
-## 🔧 Debug & Troubleshooting
+##  Debug & Troubleshooting
 
 ### **Lỗi 3 RX Drop (Phần 0)**
 
