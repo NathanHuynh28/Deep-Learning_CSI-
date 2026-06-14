@@ -1,7 +1,5 @@
 # Phan 2 - Mo hinh va huan luyen
 
-README nay ho tro viet bao cao va van hanh Phan 2. File chinh can chay la `workflow_all.ipynb`. Workflow gom 4 stage voi dung 35 planned training calls. Moi training cell nen chay mot model, khong gom nhieu model vao mot cell.
-
 ## Muc dich
 
 Phan 2 bien artifact tien xu li tu Phan 1 thanh ket qua model co the dua vao bao cao. Trong bao cao, nen trinh bay Phan 2 nhu mot thiet ke thuc nghiem co kiem soat:
@@ -62,9 +60,6 @@ Phan 2 mo hinh/
 |-- README.md
 ```
 
-Ghi chu: README dung ten folder khong dau trong vi du de de doc. Tren may hien tai, folder that co dau tieng Viet.
-
-De nop bai va chay workflow hien tai, dung `workflow_all.ipynb`. Cac notebook con lai la reference, co the dung de doi chieu y tuong nhung khong phai workflow 4 stage hien tai. Khong can chay rieng cac file `.py` vi notebook se goi trainer/model tuong ung.
 
 ## Cach chay
 
@@ -335,7 +330,7 @@ Trong bao cao, nen tach ro validation va test. Validation tra loi cau hoi "chon 
 
 ## Ket qua hien tai de dua vao bao cao
 
-Day la cac moc so lieu sau lan chay full workflow hien tai. Nen dung chung nhu bang tong hop, khong dung de tiep tuc tune model.
+Day la cac moc so lieu sau lan chay full workflow.
 
 | Nhom ket qua | Run | Metric chinh |
 | --- | --- | --- |
